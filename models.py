@@ -152,6 +152,48 @@ class Block(nn.Module):
         return h
 
 
+class ModelCNN(nn.Module):
+    """ Transformer with Self-Attentive Blocks"""
+    def __init__(self, cfg, n_labels):
+        super().__init__()
+        self.embed = Embeddings(cfg)
+        self.blocks = nn.ModuleList([Block(cfg) for _ in range(cfg.n_layers)])   # h 번 반복
+        # 卷积层, kernel size: (size, embed_dim), output: [(batch_size, kernel_num, h,1)]
+
+        # 初始化为单通道
+        channel_num =1
+        kernel_num = 256
+        embed_dim = 768
+        kernel_sizes=[3,4,5]
+        self.convs = nn.ModuleList([
+            nn.Conv2d(channel_num, kernel_num, (size, embed_dim))
+            for size in kernel_sizes
+        ])
+        self.dropout = nn.Dropout(0.5)
+        # 全连接层
+        self.fc = nn.Linear(len(kernel_sizes) * kernel_num, n_labels)
+
+
+    def forward(self, x, seg, mask):
+        h = self.embed(x, seg) #BERT (2,128, 768)
+        # flatten
+        flat_h = h.unsqueeze(1) # (2, 1, 128, 768)
+        # 卷积
+        flat_h = [F.relu(conv(flat_h)).squeeze(3) for conv in self.convs]  # (2, 1, 128, 768) => [(2, kernel_num, 126)]
+        # 池化
+        flat_h = [F.max_pool1d(i, i.size(2)).squeeze(2) for i in flat_h]  # [(batch_size, kernel_num)] (2, 128)
+        # flatten
+        flat_h = torch.cat(flat_h, 1)  # (batch_size, kernel_num * len(kernel_sizes)) (2, 384)
+        # dropout
+        flat_h = self.dropout(flat_h)
+        # fc
+        flat_h = self.fc(flat_h)  # logits, 没有softmax, (batch_size, class_num)
+
+        # for block in self.blocks:
+        #     h = block(h, mask)
+        return  flat_h #h
+
+
 class Transformer(nn.Module):
     """ Transformer with Self-Attentive Blocks"""
     def __init__(self, cfg):
@@ -160,16 +202,15 @@ class Transformer(nn.Module):
         self.blocks = nn.ModuleList([Block(cfg) for _ in range(cfg.n_layers)])   # h 번 반복
 
     def forward(self, x, seg, mask):
-        h = self.embed(x, seg)
+        h = self.embed(x, seg) #BERT (2,128, 768)
         for block in self.blocks:
             h = block(h, mask)
-        return h
-
-
+        return  h
 class Classifier(nn.Module):
     """ Classifier with Transformer """
     def __init__(self, cfg, n_labels):
         super().__init__()
+        # self.transformer = ModelCNN(cfg, n_labels) # todo CNN
         self.transformer = Transformer(cfg)
         self.fc = nn.Linear(cfg.dim, cfg.dim)
         self.activ = nn.Tanh()
@@ -181,13 +222,13 @@ class Classifier(nn.Module):
         # only use the first h in the sequence
         pooled_h = self.activ(self.fc(h[:, 0])) # 맨앞의 [CLS]만 뽑아내기
         logits = self.classifier(self.drop(pooled_h))
-        return logits
+        return logits#h #logits
 
 class Opinion_extract(nn.Module):
     """ Opinion_extraction """
     def __init__(self, cfg, max_len, n_labels):
         super().__init__()
-        self.transformer = Transformer(cfg)
+        self.transformer = ModelCNN(cfg, n_labels)  #Transformer(cfg) # todo CNN
         self.fc = nn.Linear(cfg.dim, cfg.dim)
         self.activ = nn.Tanh()
         self.drop = nn.Dropout(cfg.p_drop_hidden)

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import fire
+# import fire
 
 import torch
 import torch.nn as nn
@@ -158,5 +158,5 @@ def main(cfg, model_cfg):
 
 
 if __name__ == '__main__':
-    fire.Fire(main)
-    #main('config/uda.json', 'config/bert_base.json')
+    # fire.Fire(main)
+    main('config/demo_uda.json', 'config/bert_base.json')
