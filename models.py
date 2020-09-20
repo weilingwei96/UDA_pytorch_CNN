@@ -210,19 +210,19 @@ class Classifier(nn.Module):
     """ Classifier with Transformer """
     def __init__(self, cfg, n_labels):
         super().__init__()
-        # self.transformer = ModelCNN(cfg, n_labels) # todo CNN
-        self.transformer = Transformer(cfg)
-        self.fc = nn.Linear(cfg.dim, cfg.dim)
-        self.activ = nn.Tanh()
-        self.drop = nn.Dropout(cfg.p_drop_hidden)
-        self.classifier = nn.Linear(cfg.dim, n_labels)
+        self.transformer = ModelCNN(cfg, n_labels) # todo CNN
+        # self.transformer = Transformer(cfg)
+        # self.fc = nn.Linear(cfg.dim, cfg.dim)
+        # self.activ = nn.Tanh()
+        # self.drop = nn.Dropout(cfg.p_drop_hidden)
+        # self.classifier = nn.Linear(cfg.dim, n_labels)
 
     def forward(self, input_ids, segment_ids, input_mask):
         h = self.transformer(input_ids, segment_ids, input_mask)
-        # only use the first h in the sequence
-        pooled_h = self.activ(self.fc(h[:, 0])) # 맨앞의 [CLS]만 뽑아내기
-        logits = self.classifier(self.drop(pooled_h))
-        return logits#h #logits
+        # # only use the first h in the sequence
+        # pooled_h = self.activ(self.fc(h[:, 0])) # 맨앞의 [CLS]만 뽑아내기
+        # logits = self.classifier(self.drop(pooled_h))
+        return h #logits
 
 class Opinion_extract(nn.Module):
     """ Opinion_extraction """
