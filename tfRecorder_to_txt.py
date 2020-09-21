@@ -2,6 +2,7 @@ import numpy as np
 import os
 import tensorflow as tf
 import pandas as pd
+import argparse
 # sup_train/sup_test
 # input_ids=input_ids,
 #             input_mask=input_mask,
@@ -89,14 +90,38 @@ def read_data(path, type, outpath ):
     df.to_csv(outpath,sep='\t',index=0)
     print("Save ok.", outpath)
 
-path = os.path.join('data/proc_data/IMDB/unsup', 'bt-0.9/0/tf_examples.tfrecord.0.0')
-outpath = "/root/wlw/UDA_pytorch/demo/imdb_unsup_train.txt"
-read_data(path,'unsup', outpath)
+parser = argparse.ArgumentParser()
+parser.add_argument('--unsup_train_input_data', type=str,
+                    default="/root/wlw/uda/data/proc_data/IMDB/unsup/bt-0.9/0/tf_examples.tfrecord.0.0",
+                    help='unsup input tfRecorder examples')
+parser.add_argument('--unsup_train_output_data', type=str,
+                    default="/root/wlw/UDA_pytorch/demo/imdb_unsup_train.txt",
+                    help='unsup output txt')
+parser.add_argument('--sup_train_input_data', type=str,
+                    default="/root/wlw/uda/data/proc_data/IMDB/train_20/tf_examples.tfrecord.0.0",
+                    help='sup train input tfRecorder examples')
+parser.add_argument('--sup_train_output_data', type=str,
+                    default="/root/wlw/UDA_pytorch/demo/imdb_sup_train.txt",
+                    help='sup train output txt')
+parser.add_argument('--sup_test_input_data', type=str,
+                    default="/root/wlw/uda/data/proc_data/IMDB/dev/tf_examples.tfrecord.0.0",
+                    help='sup test input tfRecorder examples')
+parser.add_argument('--sup_test_output_data', type=str,
+                    default="/root/wlw/UDA_pytorch/demo/imdb_sup_test.txt",
+                    help='sup test output txt')
+args = parser.parse_args()
 
-path = '/root/wlw/uda/data/proc_data/IMDB/train_20/tf_examples.tfrecord.0.0'
-outpath = "/root/wlw/UDA_pytorch/demo/imdb_sup_train.txt"
-read_data(path,'train', outpath)
+# path = os.path.join('data/proc_data/IMDB/unsup', 'bt-0.9/0/tf_examples.tfrecord.0.0')
+# outpath = "/root/wlw/UDA_pytorch/demo/imdb_unsup_train.txt"
+print("Transfering Unsup Train Data...")
+read_data(args.unsup_train_input_data,'unsup', args.unsup_train_output_data)
 
-path = '/root/wlw/uda/data/proc_data/IMDB/dev/tf_examples.tfrecord.0.0'
-outpath = "/root/wlw/UDA_pytorch/demo/imdb_sup_test.txt"
-read_data(path,'test', outpath)
+# path = '/root/wlw/uda/data/proc_data/IMDB/train_20/tf_examples.tfrecord.0.0'
+# outpath = "/root/wlw/UDA_pytorch/demo/imdb_sup_train.txt"
+print("Transfering Sup Train Data...")
+read_data(args.sup_train_input_data,'train', args.sup_train_output_data)
+
+# path = '/root/wlw/uda/data/proc_data/IMDB/dev/tf_examples.tfrecord.0.0'
+# outpath = "/root/wlw/UDA_pytorch/demo/imdb_sup_test.txt"
+print("Transfering Sup Test Data...")
+read_data(args.sup_test_input_data,'test', args.sup_test_output_data)

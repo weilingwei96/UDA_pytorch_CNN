@@ -23,7 +23,7 @@ import train
 from load_data import load_data
 from utils.utils import set_seeds, get_device, _get_device, torch_device_one
 from utils import optim, configuration
-
+import argparse
 
 # TSA
 def get_tsa_thresh(schedule, global_step, num_train_steps, start, end):
@@ -159,4 +159,12 @@ def main(cfg, model_cfg):
 
 if __name__ == '__main__':
     # fire.Fire(main)
-    main('config/demo_uda.json', 'config/bert_base.json')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--uda_config', type=str,
+                        default='config/demo_uda.json',
+                        help='')
+    parser.add_argument('--bert_base_config', type=str,
+                        default='config/bert_base.json',
+                        help='unsup output txt')
+    args = parser.parse_args()
+    main(cfg=args.uda_config, model_cfg=args.bert_base_config )
