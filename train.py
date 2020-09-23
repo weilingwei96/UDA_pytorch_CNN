@@ -70,71 +70,78 @@ class Trainer(object):
         # Progress bar is set by unsup or sup data
         # uda_mode == True --> sup_iter is repeated
         # uda_mode == False --> sup_iter is not repeated
-        iter_bar = tqdm(self.unsup_iter, total=self.cfg.total_steps) if self.cfg.uda_mode \
-              else tqdm(self.sup_iter, total=self.cfg.total_steps)
-        for i, batch in enumerate(iter_bar):
-                
-            # Device assignment
-            if self.cfg.uda_mode:
-                sup_batch = [t.to(self.device) for t in next(self.sup_iter)]
-                unsup_batch = [t.to(self.device) for t in batch]
-            else:
-                sup_batch = [t.to(self.device) for t in batch]
-                unsup_batch = None
+        # iter_bar = tqdm(self.unsup_iter, total=self.cfg.total_steps) if self.cfg.uda_mode \
+        #       else tqdm(self.sup_iter, total=self.cfg.total_steps)
+        for j in range(self.cfg.total_steps):
+            iter_bar = self.unsup_iter  if self.cfg.uda_mode else self.sup_iter
+            for i, batch in enumerate(iter_bar):
 
-            # update
-            self.optimizer.zero_grad()
-            final_loss, sup_loss, unsup_loss = get_loss(model, sup_batch, unsup_batch, global_step)
-            final_loss.backward()
-            self.optimizer.step()
+                # Device assignment
+                if self.cfg.uda_mode:
+                    sup_batch = [t.to(self.device) for t in next(self.sup_iter)]
+                    unsup_batch = [t.to(self.device) for t in batch]
+                else:
+                    sup_batch = [t.to(self.device) for t in batch]
+                    unsup_batch = None
 
-            # print loss
-            global_step += 1
-            loss_sum += final_loss.item()
-            if self.cfg.uda_mode:
-                iter_bar.set_description('final=%5.3f unsup=%5.3f sup=%5.3f'\
-                        % (final_loss.item(), unsup_loss.item(), sup_loss.item()))
-            else:
-                iter_bar.set_description('loss=%5.3f' % (final_loss.item()))
+                # update
+                self.optimizer.zero_grad()
+                final_loss, sup_loss, unsup_loss = get_loss(model, sup_batch, unsup_batch, global_step)
+                final_loss.backward()
+                self.optimizer.step()
 
-            # logging            
-            if self.cfg.uda_mode:
-                logger.add_scalars('data/scalar_group',
-                                    {'final_loss': final_loss.item(),
-                                     'sup_loss': sup_loss.item(),
-                                     'unsup_loss': unsup_loss.item(),
-                                     'lr': self.optimizer.get_lr()[0]
-                                    }, global_step)
-            else:
-                logger.add_scalars('data/scalar_group',
-                                    {'sup_loss': final_loss.item()}, global_step)
+                # print loss
+                global_step += 1
+                loss_sum += final_loss.item()
+                # if self.cfg.uda_mode:
+                #     iter_bar.set_description('final=%5.3f unsup=%5.3f sup=%5.3f'\
+                #             % (final_loss.item(), unsup_loss.item(), sup_loss.item()))
+                # else:
+                #     iter_bar.set_description('loss=%5.3f' % (final_loss.item()))
+                if self.cfg.uda_mode:
+                    print(global_step, 'final=%5.3f unsup=%5.3f sup=%5.3f'\
+                            % (final_loss.item(), unsup_loss.item(), sup_loss.item()))
+                else:
+                    print(global_step,'loss=%5.3f' % (final_loss.item()))
 
-            if global_step % self.cfg.save_steps == 0:
-                self.save(global_step)
+                # logging
+                # if self.cfg.uda_mode:
+                #     logger.add_scalars('data/scalar_group',
+                #                         {'final_loss': final_loss.item(),
+                #                          'sup_loss': sup_loss.item(),
+                #                          'unsup_loss': unsup_loss.item(),
+                #                          'lr': self.optimizer.get_lr()[0]
+                #                         }, global_step)
+                # else:
+                #     logger.add_scalars('data/scalar_group',
+                #                         {'sup_loss': final_loss.item()}, global_step)
 
-            if get_acc and global_step % self.cfg.check_steps == 0 and global_step > 4999:
-                results = self.eval(get_acc, None, model)
-                total_accuracy = torch.cat(results).mean().item()
-                logger.add_scalars('data/scalar_group', {'eval_acc' : total_accuracy}, global_step)
-                if max_acc[0] < total_accuracy:
+                if global_step % self.cfg.save_steps == 0:
                     self.save(global_step)
-                    max_acc = total_accuracy, global_step
-                print('Accuracy : %5.3f' % total_accuracy)
-                print('Max Accuracy : %5.3f Max global_steps : %d Cur global_steps : %d' %(max_acc[0], max_acc[1], global_step), end='\n\n')
-
-            if self.cfg.total_steps and self.cfg.total_steps < global_step:
-                print('The total steps have been reached')
-                print('Average Loss %5.3f' % (loss_sum/(i+1)))
-                if get_acc:
+                    print('save ok... >', global_step)
+                if get_acc and global_step % self.cfg.check_steps == 0 and global_step > 199:
                     results = self.eval(get_acc, None, model)
                     total_accuracy = torch.cat(results).mean().item()
                     logger.add_scalars('data/scalar_group', {'eval_acc' : total_accuracy}, global_step)
                     if max_acc[0] < total_accuracy:
-                        max_acc = total_accuracy, global_step                
-                    print('Accuracy :', total_accuracy)
+                        self.save(global_step)
+                        max_acc = total_accuracy, global_step
+                    print('Accuracy : %5.3f' % total_accuracy)
                     print('Max Accuracy : %5.3f Max global_steps : %d Cur global_steps : %d' %(max_acc[0], max_acc[1], global_step), end='\n\n')
-                self.save(global_step)
-                return
+
+                if self.cfg.total_steps and self.cfg.total_steps < global_step:
+                    print('The total steps have been reached')
+                    print('Average Loss %5.3f' % (loss_sum/(i+1)))
+                    if get_acc:
+                        results = self.eval(get_acc, None, model)
+                        total_accuracy = torch.cat(results).mean().item()
+                        logger.add_scalars('data/scalar_group', {'eval_acc' : total_accuracy}, global_step)
+                        if max_acc[0] < total_accuracy:
+                            max_acc = total_accuracy, global_step
+                        print('Accuracy :', total_accuracy)
+                        print('Max Accuracy : %5.3f Max global_steps : %d Cur global_steps : %d' %(max_acc[0], max_acc[1], global_step), end='\n\n')
+                    self.save(global_step)
+                    return
         return global_step
 
     def eval(self, evaluate, model_file, model):

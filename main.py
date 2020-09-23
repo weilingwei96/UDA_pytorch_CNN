@@ -24,6 +24,10 @@ from load_data import load_data
 from utils.utils import set_seeds, get_device, _get_device, torch_device_one
 from utils import optim, configuration
 import argparse
+import os
+
+# os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+
 
 # TSA
 def get_tsa_thresh(schedule, global_step, num_train_steps, start, end):
@@ -58,9 +62,13 @@ def main(cfg, model_cfg):
     
     # Load Model
     model = models.Classifier(model_cfg, len(data.TaskDataset.labels))
+    optim = torch.optim.Adam(params=model.parameters(),
+                                     lr=cfg.lr,
+                                     weight_decay=5e-3) #cfg.weight_decay
 
     # Create trainer
-    trainer = train.Trainer(cfg, model, data_iter, optim.optim4GPU(cfg, model), get_device())
+    trainer = train.Trainer(cfg, model, data_iter, optim, get_device())
+    # trainer = train.Trainer(cfg, model, data_iter, optim.optim4GPU(cfg, model), get_device())
 
     # Training
     def get_loss(model, sup_batch, unsup_batch, global_step):
@@ -161,7 +169,7 @@ if __name__ == '__main__':
     # fire.Fire(main)
     parser = argparse.ArgumentParser()
     parser.add_argument('--uda_config', type=str,
-                        default='config/demo_uda.json',
+                        default='config/non-uda.json',
                         help='')
     parser.add_argument('--bert_base_config', type=str,
                         default='config/bert_base.json',
