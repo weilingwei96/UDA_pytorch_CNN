@@ -15,7 +15,7 @@ vocab=/root/wlw/UDA_pytorch/Chinese_BERT_model/vocab.txt
 # temp  save proc_data path
 proc_save_dir_train=../data/proc_data/train_20
 proc_save_dir_test=../data/proc_data/dev
-proc_save_dir_unsup=../data/proc_data/unsup \
+proc_save_dir_unsup=../data/proc_data/unsup 
 
 
 
