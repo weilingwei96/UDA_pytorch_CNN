@@ -80,7 +80,11 @@ git clone https://github.com/weilingwei96/UDA_pytorch_CNN
     
       # vocab  改成预处理时用的词表
         "vocab":"/root/wlw/UDA_pytorch_CNN/Chinese_BERT_model/vocab.txt"  
+    
+      # 相关参数  
     ```
+    
+    - 在py36 torch环境下运行 ```bash run_model.sh```
     
     
         
