@@ -2,25 +2,28 @@
 
 #conda activate py27-tf113
 # input
-input_train=/root/wlw/UDA_pytorch/data/IMDB_raw/train.txt
-input_test=/root/wlw/UDA_pytorch/data/IMDB_raw/test.txt
-input_unsup=/root/wlw/UDA_pytorch/data/IMDB_raw/unsup.txt
-input_unsup_aug=/root/wlw/UDA_pytorch/data/IMDB_raw/unsup_aug.txt
+input_train=../data/IMDB_raw/train.txt
+input_test=../data/IMDB_raw/test.txt
+input_unsup=../data/IMDB_raw/unsup.txt
+input_unsup_aug=../data/IMDB_raw/unsup_aug.txt
 
 # parameters
 max_length=25
 # bert pretrained model
-vocab=/root/wlw/UDA_pytorch/Chinese_BERT_model/vocab.txt
+vocab=../Chinese_BERT_model/vocab.txt
 
 # temp  save proc_data path
 proc_save_dir_train=../data/proc_data/train_20
 proc_save_dir_test=../data/proc_data/dev
-proc_save_dir_unsup=../data/proc_data/unsup 
+proc_save_dir_unsup=../data/proc_data/unsup \
 
 
 
 # preprocess.py
 cd generate_tf
+mkdir ../data/
+mkdir ../data/proc_data/
+
 # train
 python -u preprocess.py  \
         --raw_data_dir=${input_train}  \
@@ -46,7 +49,6 @@ python -u preprocess.py  \
         --raw_data_dir=${input_unsup}  \
         --aug_raw_data_dir=${input_unsup_aug}  \
         --output_base_dir=${proc_save_dir_unsup} \
-        --back_translation_dir=back_translation/imdb_back_trans  \
         --data_type=unsup   \
         --sub_set=unsup_in \
         --aug_ops=bt-0.9  \
