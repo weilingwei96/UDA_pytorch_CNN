@@ -6,14 +6,14 @@
     "mode": "train_eval",
     "uda_mode": true,
 
-    "total_steps": 10,
+    "total_steps": 100000,
     "max_seq_length": 128,
-    "train_batch_size": 1,
-    "eval_batch_size": 4,
+    "train_batch_size": 32,
+    "eval_batch_size": 64,
 
     "unsup_ratio": 3,
     "uda_coeff": 1,
-    "tsa": "linear_schedule",
+    "tsa": "exp_schedule",
     "uda_softmax_temp": 0.85,
     "uda_confidence_thresh": 0.45,
 
@@ -28,9 +28,9 @@
     "vocab":"BERT_Base_Uncased/vocab.txt",
     "task": "imdb",
 
-    "save_steps": 100,
+    "save_steps": 200,
     "check_steps": 250,
-    "results_dir": "results",
+    "results_dir": "results_uda",
 
     "is_position": false
 }
