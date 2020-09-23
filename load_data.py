@@ -41,8 +41,9 @@ class CsvDataset(Dataset):
         # need preprocessing
         if need_prepro:
             with open(file, 'r', encoding='utf-8') as f:
-                lines = csv.reader(f, delimiter='\t', quotechar='"')
-
+                reader = csv.reader(f, delimiter='\t', quotechar='"')
+                next(reader, None)
+                lines = reader
                 # supervised dataset
                 if d_type == 'sup':
                     # if mode == 'eval':
@@ -189,13 +190,15 @@ def dataset_class(task):
 
 
 class IMDB(CsvDataset):
-    labels = ('0', '1')
+    labels = ('neg', 'pos')
     def __init__(self, file, need_prepro, pipeline=[], max_len=128, mode='train', d_type='sup'):
         super().__init__(file, need_prepro, pipeline, max_len, mode, d_type)
 
+
     def get_sup(self, lines):
         for line in itertools.islice(lines, 0, None):
-            yield line[7], line[6], []    # label, text_a, None
+            # yield line[7], line[6], []    # label, text_a, None
+            yield line[1], line[0], []
             # yield None, line[6], []
 
     def get_unsup(self, lines):

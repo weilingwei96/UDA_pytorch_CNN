@@ -82,17 +82,18 @@ def read_data(path, type, outpath ):
             data.append(label_ids)
         datas.append(data)
         num+=1
-        if num%10==0:
-            print("Load {}".format(num ))
-            break
+        if num%1000==0:
+            print(type, "Load {}".format(num ))
+        # if num % 5000 == 0:
+        #     break
     df = pd.DataFrame(datas,columns=name)
 
     df.to_csv(outpath,sep='\t',index=0)
-    print("Save ok.", outpath)
+    print(">> Save ok.", outpath, ">", num)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--unsup_train_input_data', type=str,
-                    default="/root/wlw/uda/data/proc_data/IMDB/unsup/bt-0.9/0/tf_examples.tfrecord.0.0",
+                    default="/root/wlw/uda/data/proc_data/IMDB/unsup/bt-0.9/0/tf_examples.tfrecord.0.1",
                     help='unsup input tfRecorder examples')
 parser.add_argument('--unsup_train_output_data', type=str,
                     default="/root/wlw/UDA_pytorch/demo/imdb_unsup_train.txt",
