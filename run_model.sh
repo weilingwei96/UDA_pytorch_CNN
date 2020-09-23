@@ -26,9 +26,11 @@ python -u tfRecorder_to_txt.py \
     --sup_test_input_data=${test_input} \
     --sup_test_output_data=${test_output}
 
+echo '\n\n\n\n\n'
 echo 'UDA - pytorch running...'
 cat config/demo_uda.json
+# change uda_config path 
 python -u main.py \
       --uda_config='config/demo_uda.json' \
-      --bert_base_config='config/bert_base.json'
+      --bert_base_config='config/chinese_bert_base.json'
 
