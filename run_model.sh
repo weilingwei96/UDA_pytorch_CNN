@@ -9,9 +9,9 @@ sup_train_input=./data/proc_data/train_20/tf_examples.tfrecord.0.0
 test_input=./data/proc_data/dev/tf_examples.tfrecord.0.0
 
 # output path
-unsup_train_output=./data/demo/imdb_unsup_train.txt
-sup_train_output=./data/demo/imdb_sup_train.txt
-test_output=./data/demo/imdb_sup_test.txt
+unsup_train_output=./data/proc_data/imdb_unsup_train.txt
+sup_train_output=./data/proc_data/imdb_sup_train.txt
+test_output=./data/proc_data/imdb_sup_test.txt
 
 
 mkdir data/demo
