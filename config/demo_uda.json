@@ -1,6 +1,6 @@
 {
     "seed": 42,
-    "lr": 2e-5,
+    "lr": 5e-5,
     "warmup": 0.1,
     "do_lower_case": true,
     "mode": "train_eval",
@@ -15,7 +15,7 @@
     "uda_coeff": 1,
     "tsa": "exp_schedule",
     "uda_softmax_temp": 0.85,
-    "uda_confidence_thresh": 0.45,
+    "uda_confidence_thresh": 0.25,
 
     "data_parallel": true,
     "need_prepro": false,
@@ -24,8 +24,8 @@
     "eval_data_dir": "demo/imdb_sup_test.txt",
 
     "model_file":null,
-    "pretrain_file":"BERT_Base_Uncased/bert_model.ckpt",
-    "vocab":"BERT_Base_Uncased/vocab.txt",
+    "pretrain_file":null,
+    "vocab":"/root/wlw/UDA_pytorch_CNN/Chinese_BERT_model/vocab.txt",
     "task": "imdb",
 
     "save_steps": 200,
