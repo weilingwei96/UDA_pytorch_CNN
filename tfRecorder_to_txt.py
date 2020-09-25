@@ -31,59 +31,65 @@ def read_data(path, type, outpath ):
     elif type=='train' or type=='test':
         name = ['input_ids','input_mask', 'input_type_ids', 'label_ids']
 
-    # return
-    # path = os.path.join('data/proc_data/IMDB/unsup', 'bt-0.9/0/tf_examples.tfrecord.0.0')
-    iter = tf.python_io.tf_record_iterator(path)
     num = 0
-    for serialized_example in iter:
-        data = []
-        example = tf.train.Example()
-        example.ParseFromString(serialized_example)
+    # path  load all tf_examples.***
+    for sub_path in os.listdir(path):
+        if "tf_examples" not in sub_path:
+            print("[ERROR] Can't processing", sub_path)
+            continue
+        sub_path = os.path.join(path, sub_path)
+        # path = os.path.join('data/proc_data/IMDB/unsup', 'bt-0.9/0/tf_examples.tfrecord.0.0')
+        iter = tf.python_io.tf_record_iterator(sub_path)
+        print("[Log] Processing > ", sub_path)
 
-        if type=='unsup':
+        for serialized_example in iter:
+            data = []
+            example = tf.train.Example()
+            example.ParseFromString(serialized_example)
 
-            ori_input_ids = example.features.feature['ori_input_ids'].int64_list.value
-            ori_input_mask = example.features.feature['ori_input_mask'].int64_list.value
-            ori_input_type_ids = example.features.feature['ori_input_type_ids'].int64_list.value
-            aug_input_ids = example.features.feature['aug_input_ids'].int64_list.value
-            aug_input_mask = example.features.feature['aug_input_mask'].int64_list.value
-            aug_input_type_ids = example.features.feature['aug_input_type_ids'].int64_list.value
+            if type=='unsup':
+                ori_input_ids = example.features.feature['ori_input_ids'].int64_list.value
+                ori_input_mask = example.features.feature['ori_input_mask'].int64_list.value
+                ori_input_type_ids = example.features.feature['ori_input_type_ids'].int64_list.value
+                aug_input_ids = example.features.feature['aug_input_ids'].int64_list.value
+                aug_input_mask = example.features.feature['aug_input_mask'].int64_list.value
+                aug_input_type_ids = example.features.feature['aug_input_type_ids'].int64_list.value
 
-            ori_input_ids = list(np.array(ori_input_ids).astype(np.int64))
-            ori_input_mask = list(np.array(ori_input_mask).astype(np.int64))
-            ori_input_type_ids = list(np.array(ori_input_type_ids).astype(np.int64))
-            aug_input_ids = list(np.array(aug_input_ids).astype(np.int64))
-            aug_input_mask = list(np.array(aug_input_mask).astype(np.int64))
-            aug_input_type_ids = list(np.array(aug_input_type_ids).astype(np.int64))
-
-
-            data.append(ori_input_ids)
-            data.append(ori_input_mask)
-            data.append(ori_input_type_ids)
-            data.append(aug_input_ids)
-            data.append(aug_input_mask)
-            data.append(aug_input_type_ids)
-        else:
-            input_ids = example.features.feature['input_ids'].int64_list.value
-            input_mask = example.features.feature['input_mask'].int64_list.value
-            input_type_ids = example.features.feature['input_type_ids'].int64_list.value
-            label_ids = example.features.feature['label_ids'].int64_list.value
+                ori_input_ids = list(np.array(ori_input_ids).astype(np.int64))
+                ori_input_mask = list(np.array(ori_input_mask).astype(np.int64))
+                ori_input_type_ids = list(np.array(ori_input_type_ids).astype(np.int64))
+                aug_input_ids = list(np.array(aug_input_ids).astype(np.int64))
+                aug_input_mask = list(np.array(aug_input_mask).astype(np.int64))
+                aug_input_type_ids = list(np.array(aug_input_type_ids).astype(np.int64))
 
 
-            input_ids = list(np.array(input_ids).astype(np.int64))
-            input_mask = list(np.array(input_mask).astype(np.int64))
-            input_type_ids = list(np.array(input_type_ids).astype(np.int64))
-            label_ids = int(np.array(label_ids).astype(np.int64))
+                data.append(ori_input_ids)
+                data.append(ori_input_mask)
+                data.append(ori_input_type_ids)
+                data.append(aug_input_ids)
+                data.append(aug_input_mask)
+                data.append(aug_input_type_ids)
+            else:
+                input_ids = example.features.feature['input_ids'].int64_list.value
+                input_mask = example.features.feature['input_mask'].int64_list.value
+                input_type_ids = example.features.feature['input_type_ids'].int64_list.value
+                label_ids = example.features.feature['label_ids'].int64_list.value
 
 
-            data.append(input_ids)
-            data.append(input_mask)
-            data.append(input_type_ids)
-            data.append(label_ids)
-        datas.append(data)
-        num+=1
-        if num%1000==0:
-            print(type, "Load {}".format(num ))
+                input_ids = list(np.array(input_ids).astype(np.int64))
+                input_mask = list(np.array(input_mask).astype(np.int64))
+                input_type_ids = list(np.array(input_type_ids).astype(np.int64))
+                label_ids = int(np.array(label_ids).astype(np.int64))
+
+
+                data.append(input_ids)
+                data.append(input_mask)
+                data.append(input_type_ids)
+                data.append(label_ids)
+            datas.append(data)
+            num+=1
+            if num%1000==0:
+                print(type, "Load {}".format(num ))
         # if num % 5000 == 0:
         #     break
     df = pd.DataFrame(datas,columns=name)
@@ -93,22 +99,22 @@ def read_data(path, type, outpath ):
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--unsup_train_input_data', type=str,
-                    default="/root/wlw/uda/data/proc_data/IMDB/unsup/bt-0.9/0/tf_examples.tfrecord.0.1",
+                    default="./data/proc_data/unsup/bt-0.9/0/",
                     help='unsup input tfRecorder examples')
 parser.add_argument('--unsup_train_output_data', type=str,
-                    default="/root/wlw/UDA_pytorch/demo/imdb_unsup_train.txt",
+                    default="./demo/imdb_unsup_train.txt",
                     help='unsup output txt')
 parser.add_argument('--sup_train_input_data', type=str,
-                    default="/root/wlw/uda/data/proc_data/IMDB/train_20/tf_examples.tfrecord.0.0",
+                    default="./data/proc_data/train_20/",
                     help='sup train input tfRecorder examples')
 parser.add_argument('--sup_train_output_data', type=str,
-                    default="/root/wlw/UDA_pytorch/demo/imdb_sup_train.txt",
+                    default="demo/imdb_sup_train.txt",
                     help='sup train output txt')
 parser.add_argument('--sup_test_input_data', type=str,
-                    default="/root/wlw/uda/data/proc_data/IMDB/dev/tf_examples.tfrecord.0.0",
+                    default="data/proc_data/dev/",
                     help='sup test input tfRecorder examples')
 parser.add_argument('--sup_test_output_data', type=str,
-                    default="/root/wlw/UDA_pytorch/demo/imdb_sup_test.txt",
+                    default="demo/imdb_sup_test.txt",
                     help='sup test output txt')
 args = parser.parse_args()
 
