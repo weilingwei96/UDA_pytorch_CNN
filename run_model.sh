@@ -4,9 +4,9 @@
 ## transfer tfrecorder
 
 # input path
-unsup_train_input=./data/proc_data/unsup/bt-0.9/0/tf_examples.tfrecord.0.0
-sup_train_input=./data/proc_data/train_20/tf_examples.tfrecord.0.0
-test_input=./data/proc_data/dev/tf_examples.tfrecord.0.0
+unsup_train_input=./data/proc_data/unsup/bt-0.9/0/
+sup_train_input=./data/proc_data/train_20/
+test_input=./data/proc_data/dev/
 
 # output path
 unsup_train_output=./data/proc_data/imdb_unsup_train.txt
